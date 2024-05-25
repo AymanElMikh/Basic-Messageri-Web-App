@@ -1,12 +1,56 @@
+<%@ page import="com.jalios.jcms.uicomponent.app.AppConstants" %>
 
-<script type="text/javascript" src="../../js/filterSearch.js">
+<script type="module" src="plugins/RainbowPlugin/js/filterSearch.js">
 
 </script>
-<div class="search-conversations">
-	<div class="search-form">
-		<i class="fas fa-search search-icon"></i> <input type="text"
-			id="searchInput" placeholder="People, bubbles...">
+<script type="module" src="plugins/RainbowPlugin/js/conversation.js"></script>
 
+
+<head>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<link rel="stylesheet" href="plugins/RainbowPlugin/css/openrainbow.css">
+</head>
+
+
+<div class="search-conversations" id="search-conversations">
+
+<!-- New elements -->
+    <div class="control-buttons">
+        
+        <div class="sound-icon-wrapper">
+            <i class="fas fa-volume-up"></i>
+        </div>
+        
+        <div class="icon-group"> <!-- New container for notification and reduce icons -->
+        <div class="notification-button" id="notificationBtn">
+        
+            <i class="fas fa-bell"></i>
+            <span class="notification-counter" id="notificationCounter"></span>
+        </div>
+        
+        <div class="toggle-container" id="toggleSearchBtn">
+        <i class="fas fa-chevron-left toggle-icon"></i>
+    </div>
+    </div>
+       
+    </div>
+    
+    <!-- Notification Center -->
+        <div id="notificationList" class="notification-center" style="display: none;">
+            <div class="notification-card">
+                <h3 class="notification-title">Notification Center</h3>
+                <ul id="invitationList"></ul>
+            </div>
+        </div>
+        
+
+	<div class="search-form">
+		<i class="fas fa-search search-icon" id="searchIcon"></i> 
+		<i class="fas fa-times" id="closeButton" style="display: none;"></i> 
+		<input
+			type="text" id="searchInput" placeholder="People, bubbles...">
 	</div>
 
 	<div class="search-options">
@@ -18,12 +62,37 @@
 	</div>
 
 	<div class="recent-conversations">
-        <div class="dropdown-header" id="recentConversationsHeader">
-            <i class="fas fa-chevron-right"></i> 
-            <span id="toggleRecentBtn"
-                class="toggle-button">RECENT CONVERSATIONS</span>
-        </div>
-        <div class="flipper-flesh" id="recentConversationsList"></div>
-    </div>
-	
+		<div class="dropdown-header" id="recentConversationsHeader">
+			<i class="fas fa-chevron-right" id="recentConversationsHeader"></i> 
+			<span id="toggleRecentBtn"
+				class="toggle-button">RECENT CONVERSATIONS</span>
+		</div>
+
+		<div class="flipper-flesh" id="recentConversationsList">
+
+			<div class="conversation-item">
+				<div class="avatar-container">
+					<img class="contact-avatar" src="avatar_url_or_initials.png"
+						alt="Contact Name"> <i class="status-icon fas fa-moon away"></i>
+				</div>
+				<div class="text-container">
+					<span class="contact-name">Contact Name</span> <span
+						class="last-message">Last message content</span>
+						<span class="missed-count" id=></span>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+
+<%
+
+request.setAttribute(AppConstants.BODY_INCLUDE_PATH_REQUEST_ATTR,"plugins/RainbowPlugin/jsp/app/RainbowShortcutInfo.jsp");
+request.setAttribute("rainbow.appHandler", loginHandler);
+
+%>
+
 </div>
+
+

@@ -1,2 +1,50 @@
-<div class="main">
+<head>
+
+<link rel="stylesheet" href="plugins/RainbowPlugin/css/conversation.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+
+</head>
+
+
+<div class="main" id="mainContent">
+
+	<!--         Chat Box -->
+	<div class="chat-box" id="chatBox">
+		<!--             Message Container -->
+		<div class="message-container">
+			<!--                 Example Message: Sent Message -->
+			<div class="message sent-message" id="sentMessage"></div>
+
+			<!--                 Example Message: Received Message -->
+			<div class="message received-message" id="receivedMessage"></div>
+		</div>
+	</div>
+
+	<!--  Message Input Field and Send Button -->
+	<div class="input-container">
+
+		<button class="icon-button">
+		<span class="material-icons">gif_box</span>
+		</button>
+		<button class="icon-button">
+			<i class="fas fa-smile"></i>
+		</button>
+		<button class="icon-button">
+			<i class="fas fa-exclamation-circle"></i>
+		</button>
+		<input type="text" id="messageInput" class="message-input"
+			placeholder="Enter your text here...">
+		<button id="sendMessageBtn" class="send-button">
+			<i class="fas fa-paper-plane"></i>
+		</button>
+		<button class="icon-button">
+			<i class="fas fa-microphone"></i>
+		</button>
+		<button class="icon-button">
+			<i class="fas fa-plus"></i>
+		</button>
+
+	</div>
+
 </div>

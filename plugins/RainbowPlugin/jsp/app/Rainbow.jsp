@@ -24,39 +24,49 @@ if (loginHandler.validate()) {
     return;
 }
 
-
-String token = loginHandler.getMemberToken();
-// if we don't have the token yet we redirect the user to the rainbow authentification platform
-if (token == null || token.equals("")) {
+if(loginHandler.isLoggedIn()){
 	
-	//retrieve the RainbowAuthURI with the expected format
-    String url = loginHandler.getRainbowAuthURI();
-    
-    String validUrl = HttpUtil.validateHttpUrl(url);
+	String token = loginHandler.getMemberToken();
+	// if we don't have the token yet we redirect the user to the rainbow authentification platform
+	if (token == null || token.equals("")) {
+	    
+	    //retrieve the RainbowAuthURI with the expected format
+	    String url = loginHandler.getRainbowAuthURI();
+	    
+	    String validUrl = HttpUtil.validateHttpUrl(url);
 
-  // jcmsContext.sendRedirect(url);
-  //redirection
-    response.sendRedirect(url);
+	  // jcmsContext.sendRedirect(url);
+	  //redirection
+	    response.sendRedirect(url);
 
-} else {
-// in case we have the token then we display the rainbow interface
-%>
-
+	} else {
+	// in case we have the token then we display the rainbow interface
+	%>
 
 <%
-    // Display page content
-    String appUrl = loginHandler.getAppUrl();
+	// Display page content
+	String appUrl = loginHandler.getAppUri();
 
-    jcmsContext.setPageTitle("Open Rainbow");
-    jcmsContext.addCSSHeader("plugins/RainbowPlugin/css/Rainbow.css");
-    jcmsContext.addJavaScript("plugins/RainbowPlugin/js/RainbowSDK.js");
-%>
+	String WebsiteURL=loginHandler.getWebsiteURL();
+
+	    jcmsContext.setPageTitle("Open Rainbow");
+	    jcmsContext.addCSSHeader("plugins/RainbowPlugin/css/Rainbow.css");
+	    jcmsContext.addJavaScript("plugins/RainbowPlugin/js/RainbowSDK.js");
+	%>
+
 
 <head>
-<link rel="stylesheet" href="../../css/openrainbow.css">
+<link rel="stylesheet" href="plugins/RainbowPlugin/css/openrainbow.css"
+<link rel="stylesheet" href="plugins/RainbowPlugin/css/sidebar.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/solid.min.css">
+
+
 </head>
 
 <!-- Include necessary external libraries -->
+
 <script
 	src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js"></script>
 <script
@@ -67,36 +77,49 @@ if (token == null || token.equals("")) {
 <script
 	src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.5/angular.min.js"></script>
 
+
 <!-- Include the Rainbow Web SDK -->
-<script src="../../rainbow-web-sdk/src/vendors-sdk.min.js"></script>
+<script
+	src="plugins/RainbowPlugin/rainbow-web-sdk/src/vendors-sdk.min.js"></script>
+
 
 <!--  Include the openrainbowSDK.js as a module type -->
-<script type="module" src="../../js/RainbowSDK.js"></script>
-
-<div class="ajax-refresh-div" data-jalios-ajax-refresh-url=<%= appUrl %>>
-	<jalios:app name="OpenRainbow">
-		<div class="container">
-
-			<!-- Sidebar -->
-			<%@ include
-				file='/plugins/RainbowPlugin/jsp/app/doRainbowSidebar.jspf'%>
-
-			<div class="content-section">
-				<!-- Search and Recent Conversations Section -->
-				<%@ include
-					file='/plugins/RainbowPlugin/jsp/app/doRainbowConversations.jspf'%>
-				<!-- Main Section -->
-				<%@ include file='/plugins/RainbowPlugin/jsp/app/doRainbowBody.jspf'%>
-
-			</div>
+<script type="module" src="plugins/RainbowPlugin/js/RainbowSDK.js"></script>
 
 
-			<%@ include file='/plugins/RainbowPlugin/jsp/app/Details.jspf'%>
+<script>
+	window.WebsiteURL = "<%= WebsiteURL %>";
+	</script>
 
-		</div>
-	</jalios:app>
+
+<%@ include file='/jcore/doHeader.jspf'%>
+
+<div class="ajax-refresh-div" data-jalios-ajax-refresh-url="<%= appUrl %>">
+
+    <jalios:app name="OpenRainbow">
+        <div class="container">
+            <!-- Sidebar -->
+            <%@ include file='/plugins/RainbowPlugin/jsp/app/doRainbowSidebar.jspf'%>
+            <!-- Search and Recent Conversations Section -->
+            <%@ include file='/plugins/RainbowPlugin/jsp/app/doRainbowConversations.jspf'%>
+            <!-- Chat Area -->
+            <%@ include file='/plugins/RainbowPlugin/jsp/app/doRainbowBody.jspf'%>
+            <!-- User Details -->
+            <%@ include file='/plugins/RainbowPlugin/jsp/app/Details.jspf'%>
+        </div>
+    </jalios:app>
+
+    <%@ include file='/jcore/doAjaxFooter.jspf'%>
 </div>
 
 <%
-    }
+}
+
+} else{
+	response.sendRedirect(loginHandler.getWebsiteURL());
+}
+
 %>
+
+
+

@@ -52,19 +52,47 @@ if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
         // Handle a POST request within for AJAX to save the token
 
         String token = request.getParameter("access_token");
-
-        //save the token
-        loginHandler.setMemberToken(token);
         
-        response.setContentType("text/plain"); //content type to plain text
+        		
+        if (token!= null &&!token.isEmpty()) {
+        	
+            //save the token
+            loginHandler.setMemberToken(token);
+            
+            response.setContentType("text/plain"); //content type to plain text
 
-        try (PrintWriter ouut = response.getWriter()) {
-        	//send a succes message in response
-            ouut.print("Success");
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try (PrintWriter ouut = response.getWriter()) {
+                //send a succes message in response
+                ouut.print("Success");
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        
+        } else {
+        	// Token does not exist, handle just the counts
+            // Retrieve the counts from the request parameters
+            String invitationsCountStr = request.getParameter("invitationsCountParam");
+            String msgCountStr = request.getParameter("messagesCountParam");
+
+            // Convert the counts from Strings to integers
+            int invitationsCount = Integer.parseInt(invitationsCountStr);
+            int msgCount = Integer.parseInt(msgCountStr);
+            
+            loginHandler.setInvitationCount(invitationsCount);
+            loginHandler.setMessageCount(msgCount);
+
+            response.setContentType("text/plain"); // Content type to plain text
+
+            try (PrintWriter outtt = response.getWriter()) {
+                // Send a success message in response
+                outtt.print("Success");
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
         }
+   
     } else {
         response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }

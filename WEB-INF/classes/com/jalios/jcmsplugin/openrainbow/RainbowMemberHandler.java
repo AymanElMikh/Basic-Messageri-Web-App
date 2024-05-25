@@ -1,9 +1,8 @@
 package com.jalios.jcmsplugin.openrainbow;
 
-import com.jalios.jcms.BasicDataController;
 import com.jalios.jcms.Member;
 
-public class RainbowMemberHandler extends BasicDataController{
+public class RainbowMemberHandler{
 
 	private final static String TOKENPROPERTYNAME = "extra.Member.jcmsplugin.rainbow.tokenRainbow";
 

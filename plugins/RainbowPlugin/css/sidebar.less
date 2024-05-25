@@ -5,8 +5,7 @@
 @import "../../../css/plugin.less";
 
 @sidebar-text-color: #fff;
-@sidebar-padding: 20px;
-@sidebar-icon-size: 45px;
+
 @profile-icon-hover-bg: rgba(203, 210, 217, 0.5); // Transparent hover effect for the profile icon
 @tooltip-bg-color: #000;
 @tooltip-text-color: #fff;
@@ -14,52 +13,40 @@
 
 // Define colors and other variables if needed
 @sidebar-bg-color: #1f68d6;
+@sidebarwidth :50px;
 
 // Sidebar styles
+
 .sidebar {
-    width: 50px; /* Increased width for better visibility */
+    flex: 0 0 @sidebarwidth;
     background-color: @sidebar-bg-color;
-    color: @sidebar-text-color;
-    padding: @sidebar-padding;
-    flex-shrink: 0;
+    color: white;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 1;
+    height: 100%;
+    flex-shrink: 0;
 
-    left: 0;
-    position: fixed;
-    box-sizing: border-box;
-    top: 0;
-    bottom: 0;
-    padding: 32px 12px;
 }
 
-.sidebar-icon {
-    
-    cursor: pointer;
-    position: relative;
-    display: block;
-    justify-content: center;
-    align-items: center;
-    width: 25px;
-    height: 25px;
-    z-index: 1;
-    margin-bottom: 20px;
+.header-icon {
+    padding-top: 20px;
+    font-size: 24px;
 }
 
-// Profile icon styles
-.profile-icon {
-    cursor: pointer;
-    position: relative;
-    justify-content: center;
-    align-items: center;
-    width: 25px;
-    height: 25px;
-    z-index: 1;
-    margin-top: 0px;
-    margin-bottom: 20px;
+.icons {
+            flex: 1; /* This will take up all available space */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+.icons .icon {
+    font-size: 16px;
+    margin: 10px 0;
 }
+
 
 .profile-icon:hover::before {
     content: "";
@@ -81,6 +68,18 @@
     background-color: transparent;
     border-radius: 5px;
 }
+.bottom-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0px;/* Adjust as necessary */
+        }
+        
+        .bottom-icons .icon {
+                font-size: 16px;
+                
+                margin-bottom: 15px;
+        }
 
 // Tooltip styles
 .tooltip {

@@ -10,9 +10,8 @@
     <directory path="properties" />
   </private-files>
   
-  
-<plugincomponents>
-  <datacontroller class="com.jalios.jcmsplugin.openrainbow.RainbowMemberHandler" types="Member" />
+  <plugincomponents>
+  <policyfilter class="com.jalios.jcmsplugin.openrainbow.component.RainbowShortcutPolicyFilter" />
 </plugincomponents>
 
   <public-files>

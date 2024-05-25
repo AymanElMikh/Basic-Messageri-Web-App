@@ -4,6 +4,7 @@ data.$id.shortcut.jcmsplugin.Rainbow.text: OpenRainbow Chat
 
 extra.Member.jcmsplugin.rainbow.tokenRainbow: Rainbow token
 
-jcmsplugin.rainbowPlugin.APPLICATIONID: Identify ID
-jcmsplugin.rainbowPlugin.APPLICATIONSECRET: App Secret ID
+jcmsplugin.rainbowPlugin.APPLICATIONID: Application ID
+jcmsplugin.rainbowPlugin.APPLICATIONSECRET: Application Secret ID
 jcmsplugin.rainbowPlugin.OAuthRedirect: Redirect Uri
+jcmsplugin.rainbowPlugin.url: Website URL

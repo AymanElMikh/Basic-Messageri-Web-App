@@ -1,6 +1,8 @@
 
 // listen to page loading to fetch the token
 document.addEventListener('DOMContentLoaded', function() {
+    
+    const URL = window.WebsiteURL;
     //retrieves the token in the current url of the page and delete first character which is #
     var hashParams = new URLSearchParams(window.location.hash.substring(1));
     //get the token from the url
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentProgress = 0;
         
         jQuery.ajax({
-            url: 'http://localhost:8080/jcms/plugins/RainbowPlugin/jsp/app/LoginInfo.jsp',
+            url: URL+'plugins/RainbowPlugin/jsp/app/LoginInfo.jsp',
             type: 'POST',
             data: { access_token: token },
             dataType: 'text', // Change dataType to text since the response is plain text
@@ -25,8 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     // redirection with a deelay
                     setTimeout(function() {
                         window.location.href = "plugins/RainbowPlugin/jsp/app/Rainbow.jsp";
-                        currentProgress=100;
-                    }, 1000); // Delay in milliseconds
+                        currentProgress = 100;
+                    }, 4000); // Delay in milliseconds
+
+                 
                 } else {
                     console.error("Failed to save token.");
                 }
@@ -41,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearInterval(intervalId);
                 return;
             }
-            currentProgress += 5;  // Adjust increment for desired speed (lower for faster)
+            currentProgress += 2;  // Adjust increment for desired speed (lower for faster)
             progressBar.style.width = `${currentProgress}%`;
             
             // Display the current progress value in the console
