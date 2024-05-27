@@ -3,6 +3,7 @@ import rainbowSDK from '../rainbow-web-sdk/src/rainbow-sdk.min.js';
 //import rainbowSDK from 'rainbow-web-sdk'; // If you use the bundler (for example - Webpack)
 import { getRecentConversations } from './conversation.js';
 
+
 let onReady = function onReady() {
 
     console.log('[Hello World] :: On SDK Ready!');

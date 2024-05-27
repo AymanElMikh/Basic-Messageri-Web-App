@@ -1,12 +1,14 @@
 <%@ page import="com.jalios.jcms.uicomponent.app.AppConstants" %>
 
-<script type="module" src="plugins/RainbowPlugin/js/filterSearch.js">
+<script type="module" src="../../js/filterSearch.js">
 
 </script>
-<script type="module" src="plugins/RainbowPlugin/js/conversation.js"></script>
+<script type="module" src="../../js/conversation.js"></script>
 
 
 <head>
+
+<link rel="stylesheet" href="../../css/openrainbow.css">
 <link rel="stylesheet"
 	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
@@ -84,14 +86,6 @@
 
 		</div>
 	</div>
-
-
-<%
-
-request.setAttribute(AppConstants.BODY_INCLUDE_PATH_REQUEST_ATTR,"plugins/RainbowPlugin/jsp/app/RainbowShortcutInfo.jsp");
-request.setAttribute("rainbow.appHandler", loginHandler);
-
-%>
 
 </div>
 

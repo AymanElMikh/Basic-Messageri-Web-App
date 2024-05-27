@@ -79,8 +79,8 @@ if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
             int invitationsCount = Integer.parseInt(invitationsCountStr);
             int msgCount = Integer.parseInt(msgCountStr);
             
-            loginHandler.setInvitationCount(invitationsCount);
-            loginHandler.setMessageCount(msgCount);
+            openRainbowAppHandler.setInvitationCount(invitationsCount);
+            openRainbowAppHandler.setMessageCount(msgCount);
 
             response.setContentType("text/plain"); // Content type to plain text
 

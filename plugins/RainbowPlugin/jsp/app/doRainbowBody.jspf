@@ -1,13 +1,34 @@
 <head>
 
-<link rel="stylesheet" href="plugins/RainbowPlugin/css/conversation.css">
+<link rel="stylesheet" href="../../css/conversation.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+	rel="stylesheet">
 
 </head>
 
 
 <div class="main" id="mainContent">
+
+
+
+	<!-- Contact Information Display Area -->
+<div class="contact-info" id="contactInfo" style="display: none;">
+    <div class="clicked-avatar-container">
+        <img class="contact-members-avatar" alt="Contact Avatar">
+    </div>
+    <div class="clicked-contact-details">
+        <div class="clicked-contact-name"></div>
+        <div class="status-container">
+            <div class="clicked-status-icon"></div>
+            <div class="clicked-status-text"></div>
+        </div>
+    </div>
+    <div class="actions">
+        <i class="fas fa-ellipsis-v"></i>
+        <i class="fas fa-chevron-right"></i>
+    </div>
+</div>
+
 
 	<!--         Chat Box -->
 	<div class="chat-box" id="chatBox">
@@ -25,7 +46,7 @@
 	<div class="input-container">
 
 		<button class="icon-button">
-		<span class="material-icons">gif_box</span>
+			<span class="material-icons">gif_box</span>
 		</button>
 		<button class="icon-button">
 			<i class="fas fa-smile"></i>
