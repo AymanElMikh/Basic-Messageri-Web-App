@@ -24,7 +24,6 @@ export function getRecentConversations() {
                     displayOneToOneConversation(conversation.dbId);
                 }
 
-
                 if (conversation.type === 1) {
                     displayBubbleConversation(conversation.dbId);
                 }
@@ -45,148 +44,158 @@ function displayOneToOneConversation(conversationId) {
     // Get contact ID from the conversation
     const conversation = rainbowSDK.conversations.getConversationById(conversationId);
 
-
     if (!conversation) {
         console.error('Conversation data not found');
         return;
     }
-console.log("Fetching contact for conversation:", conversation);
+    console.log("Fetching contact for conversation:", conversation);
 
-    rainbowSDK.contacts.getContactById(conversation.contact.dbId)
-        .then(contact => {
-            var contactName = contact.firstname + ' ' + contact.lastname;
-            var contactAvatar = contact.avatar;
-            
-            console.log("Fetched contact:", contact);
+    var contact = conversation.contact;
 
-            // Create the conversation item container
-            var conversationItem = document.createElement('div');
-            conversationItem.classList.add('conversation-item');
-            conversationItem.id = conversation.dbId;
 
-            // Create the avatar container
-            var avatarContainer = document.createElement('div');
-            avatarContainer.classList.add('avatar-container');
+    var contactName = contact.firstname + ' ' + contact.lastname;
+    var contactAvatar = contact.avatar;
 
-            // Create the avatar element
-            var avatarImg = document.createElement('img');
-            avatarImg.classList.add('contact-avatar');
-            avatarImg.alt = contactName;
+    console.log("Fetched contact:", contact);
 
-            if (contactAvatar) {
-                avatarImg.src = contactAvatar.src;
-            } else {
-                var initials = contactName.split(' ').map(part => part.charAt(0)).join('');
-                avatarImg.src = `https://ui-avatars.com/api/?name=${initials}`;
-            }
+    // Create the conversation item container
+    var conversationItem = document.createElement('div');
+    conversationItem.classList.add('conversation-item');
+    conversationItem.id = conversation.dbId;
 
-            // Create the status icon element
-            var statusIcon = document.createElement('i');
-            statusIcon.classList.add('status-icon');
-            
-            // Clear any existing status classes
-            console.log("Contact status before setting icon:", contact.status);
+    // Create the avatar container
+    var avatarContainer = document.createElement('div');
+    avatarContainer.classList.add('avatar-container');
 
-            // Check the contact status and add the appropriate icon
-            switch (contact.status){
-                    case 'online':
-                        statusIcon.classList.add('fas', 'fa-check-circle', 'online');
-                        break;
-                    case 'away':
-                        statusIcon.classList.add('fas', 'fa-moon', 'away');
-                        break;
-                    case 'dnd':
-                        statusIcon.classList.add('fas', 'fa-minus-circle', 'dnd');
-                        break;
-                    case 'unknown':
-                        statusIcon.classList.add('fas', 'fa-circle', 'offline');
-                        break;
-                    case 'offline':
-                    default:
-                        statusIcon.classList.add('fas', 'fa-circle', 'offline');
-                        break;
+    // Create the avatar element
+    var avatarImg = document.createElement('img');
+    avatarImg.classList.add('contact-avatar');
+    avatarImg.alt = contactName;
+
+    if (contactAvatar) {
+        avatarImg.src = contactAvatar.src;
+    } else {
+        var initials = contactName.split(' ').map(part => part.charAt(0)).join('');
+        avatarImg.src = `https://ui-avatars.com/api/?name=${initials}`;
+    }
+
+    // Create the status icon element
+    var statusIcon = document.createElement('i');
+    statusIcon.classList.add('status-icon');
+
+    // Clear any existing status classes
+    console.log("Contact status before setting icon:", contact.status);
+
+    // Check the contact status and add the appropriate icon
+    switch (contact.status) {
+        case 'online':
+            statusIcon.classList.add('fas', 'fa-check-circle', 'online');
+            break;
+        case 'away':
+            statusIcon.classList.add('fas', 'fa-moon', 'away');
+            break;
+        case 'dnd':
+            statusIcon.classList.add('fas', 'fa-minus-circle', 'dnd');
+            break;
+        case 'unknown':
+            statusIcon.classList.add('fas', 'fa-circle', 'offline');
+            break;
+        case 'offline':
+        default:
+            statusIcon.classList.add('fas', 'fa-circle', 'offline');
+            break;
+    }
+
+    console.log("Status icon classes after setting:", statusIcon.className);
+    // Append the avatar and status indicator to the avatar container
+    avatarContainer.appendChild(avatarImg);
+    avatarContainer.appendChild(statusIcon);
+
+    // Create the text container
+    var textContainer = document.createElement('div');
+    textContainer.classList.add('text-container');
+
+    // Create the name element
+    var nameSpan = document.createElement('span');
+    nameSpan.classList.add('contact-name');
+    nameSpan.textContent = contactName;
+
+    // Create the last message element
+    var lastMessageSpan = document.createElement('span');
+    lastMessageSpan.classList.add('last-message'); // Add CSS class for styling
+
+    // Retrieve the last message text
+    var lastMessage = conversation.lastMessageText;
+
+    // Update last message text if deleted (handle both null and empty string)
+    if (!lastMessage) {
+        lastMessageSpan.textContent = "Message deleted";
+    } else {
+        
+        isSentByMe(conversation.dbId)
+            .then(isSentByMe => {
+
+                if (isSentByMe) {
+                    console.log("You sent the last message in conversation 123.");
+                    // Truncate the message if it's longer than 30 characters
+                    var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+                    lastMessageSpan.textContent = "Me: " + truncatedMessage;
+
+                } else {
+                    // Truncate the message if it's longer than 30 characters
+                    var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+                    lastMessageSpan.textContent = truncatedMessage;
                 }
-                
-                 console.log("Status icon classes after setting:", statusIcon.className);
-            // Append the avatar and status indicator to the avatar container
-            avatarContainer.appendChild(avatarImg);
-            avatarContainer.appendChild(statusIcon);
-
-            // Create the text container
-            var textContainer = document.createElement('div');
-            textContainer.classList.add('text-container');
-
-            // Create the name element
-            var nameSpan = document.createElement('span');
-            nameSpan.classList.add('contact-name');
-            nameSpan.textContent = contactName;
-
-            // Create the last message element
-            var lastMessageSpan = document.createElement('span');
-            lastMessageSpan.classList.add('last-message'); // Add CSS class for styling
-
-            // Retrieve the last message text
-            var lastMessage = conversation.lastMessageText;
-
-            // Update last message text if deleted (handle both null and empty string)
-            if (!lastMessage) {
-                lastMessageSpan.textContent = "Message deleted";
-            } else {
-                // Truncate the message if it's longer than 30 characters
-                var truncatedMessage = lastMessage.length > 30 ? lastMessage.substring(0, 30) + '...' : lastMessage;
-                lastMessageSpan.textContent = truncatedMessage;
-            }
-
-            // Create the missed messages count element
-            var missedCountSpan = document.createElement('span');
-            missedCountSpan.classList.add('missed-count');
-            if (conversation.missedCounter > 0) {
-                missedCountSpan.style.display = 'inline-block';
-                missedCountSpan.textContent = conversation.missedCounter;
-            }
-
-            // Append name, last message, and missed count to the text container
-            textContainer.appendChild(nameSpan);
-            textContainer.appendChild(lastMessageSpan);
-
-
-            // Append avatar container and text container to the conversation item
-            conversationItem.appendChild(avatarContainer);
-            conversationItem.appendChild(textContainer);
-            conversationItem.appendChild(missedCountSpan);
-
-
-
-            // Make the conversation item clickable
-            conversationItem.addEventListener('click', function() {
-                var contactId = contact.dbId;
-                console.log("here is the conv one to one ID", conversation.dbId);
-                handleConversationClick(conversation.dbId);
-
-                // Add active class to the selected item and remove from others
-                document.querySelectorAll('.conversation-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                conversationItem.classList.add('active');
-                rainbowSDK.im.markAllMessagesFromConversationAsRead(conversation.dbId)
-
-                console.log("Messages marked as read:");
-
-                updateMissedMessagesCounter(conversationItem, 0);
-
-                handleDisplayContact(contactId);
+            })
+            .catch(error => {
+                console.error("Error checking last message sender:", error);
             });
-            // Append the conversation item to the flipper flesh
-            document.getElementById('recentConversationsList').appendChild(conversationItem);
-        })
-        .catch(err => {
-            console.log('[Hello World] :: Something went wrong while getting the contactById..', err);
+    }
+
+    // Create the missed messages count element
+    var missedCountSpan = document.createElement('span');
+    missedCountSpan.classList.add('missed-count');
+    if (conversation.missedCounter > 0) {
+        missedCountSpan.style.display = 'inline-block';
+        missedCountSpan.textContent = conversation.missedCounter;
+    }
+
+    // Append name, last message, and missed count to the text container
+    textContainer.appendChild(nameSpan);
+    textContainer.appendChild(lastMessageSpan);
+
+
+    // Append avatar container and text container to the conversation item
+    conversationItem.appendChild(avatarContainer);
+    conversationItem.appendChild(textContainer);
+    conversationItem.appendChild(missedCountSpan);
+
+    // Make the conversation item clickable
+    conversationItem.addEventListener('click', function() {
+        var contactId = contact.dbId;
+        console.log("here is the conv one to one ID", conversation.dbId);
+        handleConversationClick(conversation.dbId);
+
+        // Add active class to the selected item and remove from others
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.remove('active');
         });
+        conversationItem.classList.add('active');
+        rainbowSDK.im.markAllMessagesFromConversationAsRead(conversation.dbId)
+
+        console.log("Messages marked as read:");
+
+        updateMissedMessagesCounter(conversationItem,0);
+
+        handleDisplayContact(contactId);
+    });
+    // Append the conversation item to the flipper flesh
+    document.getElementById('recentConversationsList').appendChild(conversationItem);
 }
 
 function displayBubbleConversation(conversationId) {
-    
-        // Get contact ID from the conversation
+
+    // Get contact ID from the conversation
     const conversation = rainbowSDK.conversations.getConversationById(conversationId);
 
 
@@ -194,7 +203,7 @@ function displayBubbleConversation(conversationId) {
         console.error('Conversation data not found');
         return;
     }
-    
+
     // Create the conversation item
     var conversationItem = document.createElement('div');
     conversationItem.classList.add('conversation-item');
@@ -227,14 +236,37 @@ function displayBubbleConversation(conversationId) {
     nameSpan.classList.add('contact-name');
     nameSpan.textContent = conversation.room.name;
 
-    var lastMessage = conversation.lastMessageText;
-
-    var truncatedMessage = lastMessage.length > 30 ? lastMessage.substring(0, 30) + '...' : lastMessage;
-
     // Create the last message element
     var lastMessageSpan = document.createElement('span');
-    lastMessageSpan.classList.add('last-message');
-    lastMessageSpan.textContent = truncatedMessage;
+    lastMessageSpan.classList.add('last-message'); // Add CSS class for styling
+
+    // Retrieve the last message text
+    var lastMessage = conversation.lastMessageText;
+
+    // Update last message text if deleted (handle both null and empty string)
+    if (!lastMessage) {
+        lastMessageSpan.textContent = "Message deleted";
+    } else {
+        
+        lastMessageSenderInBubble(conversation.dbId)
+            .then(lastSender => {
+
+                if (lastSender) {
+                    
+                    var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+                    lastMessageSpan.textContent = lastSender + ": " +truncatedMessage;
+
+                } else {
+                    
+                    var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+                    lastMessageSpan.textContent = truncatedMessage;
+                }
+            })
+            .catch(error => {
+                console.error("Error checking last message sender:", error);
+            });
+    }
+    
 
     // Append name, last message, and missed count to the text container
     textContainer.appendChild(nameSpan);
@@ -281,16 +313,15 @@ function displayBubbleConversation(conversationId) {
 }
 
 function updateMissedMessagesCounter(conversationItem, count) {
-  let missedCountSpan = conversationItem.querySelector('.missed-count');
-  if (missedCountSpan) {
-    // Update the count directly
-    missedCountSpan.textContent = count;
+    let missedCountSpan = conversationItem.querySelector('.missed-count');
+    if (missedCountSpan) {
+        // Update the count directly
+        missedCountSpan.textContent = count;
 
-    // Toggle visibility based on the count
-    missedCountSpan.style.display = count > 0 ? 'inline-block' : 'none'; // Concise conditional expression
-  }
+        // Toggle visibility based on the count
+        missedCountSpan.style.display = count > 0 ? 'inline-block' : 'none'; // Concise conditional expression
+    }
 }
-
 
 function updateLastMessage(conversationId, newMessage) {
     const conversationItem = document.getElementById(conversationId);
@@ -301,45 +332,66 @@ function updateLastMessage(conversationId, newMessage) {
     }
 }
 
-let onNewMessageReceived = function (event) {
-  let message = event.detail.message;
-  let conversation = event.detail.conversation;
-  console.log('the conversation', conversation);
-  console.log('You just received this Message:', message.data);
+let onNewMessageReceived = function(event) {
+    let message = event.detail.message;
+    let conversation = event.detail.conversation;
+    let lastMessage=message.data;
+    
 
-  // Get conversation item
-  let conversationItem = document.getElementById(conversation.dbId);
+    // Get conversation item
+    let conversationItem = document.getElementById(conversation.dbId);
 
-  // Send a read receipt only if conversation is not active
-  if (!conversationItem.classList.contains('active')) {
-    rainbowSDK.im.markMessageFromConversationAsRead(conversation.dbId, message.id);
-  }
-
-
-  // Update missed messages counter
-  let currentCount = parseInt(conversationItem.querySelector('.missed-count').textContent) || 0;
-  if (conversation.type === 0) { // One-to-one conversation
+    // Send a read receipt only if conversation is not active
     if (!conversationItem.classList.contains('active')) {
-      currentCount++;
+        rainbowSDK.im.markMessageFromConversationAsRead(conversation.dbId, message.id);
     }
-  } else if (conversation.type === 1) { // Group (bubble) conversation
-    if (!conversationItem.classList.contains('active')) {
-      currentCount++;
-    }
-  }
-  updateMissedMessagesCounter(conversationItem, currentCount);
 
-  // Update last message
-  updateLastMessage(conversation.dbId, message.data);
+    // Update missed messages counter
+    let currentCount = parseInt(conversationItem.querySelector('.missed-count').textContent) || 0;
+    
+    if (conversation.type === 0){
+        // One-to-one conversation
+        var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+        var updatedmessage = truncatedMessage;
 
-  // (Optional) Handle conversation click for displaying messages
-  if (conversationItem.classList.contains('active')) {
-    if (conversation.type === 0) {
-      handleConversationClick(conversation.dbId);
-    } else if (conversation.type === 1) {
-      handleBubbleClick(conversation.dbId);
+        if (!conversationItem.classList.contains('active')) {
+            currentCount++;
+        }
+        // Update last message
+        updateLastMessage(conversation.dbId, updatedmessage);
+    } else if (conversation.type === 1){
+        
+        lastMessageSenderInBubble(conversation.dbId)
+            .then(lastSender => {
+                
+                 if (lastSender) {
+                    
+                    var truncatedMessage = lastMessage.length > 25 ? lastMessage.substring(0, 25) + '...' : lastMessage;
+                    var bubbleUpdatedmessage = lastSender + ": " +truncatedMessage;
+                        // Update last message 
+                    updateLastMessage(conversation.dbId, bubbleUpdatedmessage);
+                }
+
+            })
+            .catch(error => {
+                console.error("Error checking last message sender:", error);
+            });
+         // Group (bubble) conversation
+        
+        if (!conversationItem.classList.contains('active')) {
+            currentCount++;
+        }
     }
-  }
+    updateMissedMessagesCounter(conversationItem, currentCount);
+
+    // (Optional) Handle conversation click for displaying messages
+    if (conversationItem.classList.contains('active')) {
+        if (conversation.type === 0) {
+            handleConversationClick(conversation.dbId);
+        } else if (conversation.type === 1) {
+            handleBubbleClick(conversation.dbId);
+        }
+    }
 };
 
 document.addEventListener(rainbowSDK.im.RAINBOW_ONNEWIMMESSAGERECEIVED, onNewMessageReceived)
@@ -391,19 +443,51 @@ function sentCounts(invitationCount, messagesCount) {
 }
 
 function isSentByMe(conversationId) {
-    // Get conversation history messages
+    
+  const myUserId = rainbowSDK.contacts.getConnectedUser().dbId;
+  return new Promise((resolve, reject) => {
     rainbowSDK.im.getMessagesFromConversation(conversationId, 30)
-        .then(conversation => {
-            var messages = conversation.messages;
-            console.log("here are the messages " + messages)
+      .then(conversation => {
+        const messages = conversation.messages;
+        const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+        console.log("check if is sent by me",lastMessage);
 
-        })
-        .catch(error => {
-
-            console.error('Error getting conversation history:', error);
-        });
-
+        if (lastMessage) {
+          resolve(lastMessage.from.dbId === myUserId);
+        } else {
+          resolve(false); // No last message, assume not sent by current user
+        }
+      })
+      .catch(error => {
+        console.error('Error getting conversation history:', error);
+        reject(error);
+      });
+  });
 }
+
+function lastMessageSenderInBubble(conversationId) {
+  const myUserId = rainbowSDK.contacts.getConnectedUser().dbId;
+
+  return new Promise((resolve, reject) => {
+    rainbowSDK.im.getMessagesFromConversation(conversationId, 30)
+      .then(conversation => {
+        const messages = conversation.messages;
+        const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+
+        if (lastMessage) {
+          const senderName = lastMessage.from.dbId === myUserId ? "Me" : lastMessage.from.firstname;
+          resolve(senderName);
+        } else {
+          resolve(null); // Indicate no last message
+        }
+      })
+      .catch(error => {
+        console.error('Error getting conversation history:', error);
+        reject(error);
+      });
+  });
+}
+
 
 // function to handle the onlick of bubble conversation
 function handleBubbleClick(conversationId) {
@@ -448,10 +532,10 @@ function handleBubbleClick(conversationId) {
                 messages.forEach(message => {
                     console.log("Message:", message);
                     const isMe = message.from.dbId === myUserId;
-                    displayMessage(conversationData.dbId,message, isMe);
+                    displayMessage(conversationData.dbId, message, isMe);
                 });
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
+                chatBox.scrollTop = chatBox.scrollHeight;
+
             } else {
                 console.log('No messages found for this conversation.');
             }
@@ -476,27 +560,36 @@ function handleBubbleClick(conversationId) {
         }
         const message = messageInput.value.trim();
         if (message !== '') {
-            chatWithBubble(conversationId, message);
+            chatWithBubble(conversationData.room.dbId, message);
             messageInput.value = '';
         }
     });
 }
 
-function chatWithBubble(conversationId, message) {
+function chatWithBubble(bubbleId, message) {
 
-    console.log('Starting chat with contact with ID :', contactId);
+    rainbowSDK.conversations.getConversationByBubbleId(bubbleId)
+        .then(conversation => {
 
-    const conversationData = rainbowSDK.conversations.getConversationById(conversationId);
+            console.log("here is the conversation room", conversation);
 
-    rainbowSDK.sendMessageToBubble(conversationData.room, message)
-        .then(message => {
-            console.log("here is ", message);
-            handleBubbleClick(conversationData.dbId);
+            rainbowSDK.im.sendMessageToBubble(conversation.room, message)
+                .then(message => {
+                    console.log("here is ", message);
+                    handleBubbleClick(conversation.dbId);
+                    // Update last message
+                    updateLastMessage(conversation.dbId, "Me: " + message.data);
+                })
+                .catch(error => {
+
+                    console.log("soemthing went wrong while sending a message to the bubble", error);
+                })
+
         })
         .catch(error => {
+            console.error('Error getting conversation by bubble ID:', error);
+        });
 
-            console.log("soemthing went wrong while sending a message to the bubble", error);
-        })
 }
 
 // Function to handle conversation click
@@ -546,13 +639,10 @@ export function handleConversationClick(conversationId) {
 
             if (Array.isArray(messages) && messages.length > 0) {
                 messages.forEach(message => {
-                    console.log("Message:", message);
                     const isMe = message.from.dbId === myUserId;
-                    displayMessage(conversation.dbId,message, isMe);
+                    displayMessage(conversation.dbId, message, isMe);
                 });
-                
-                // Scroll chat box to bottom
-                
+
                 chatBox.scrollTop = chatBox.scrollHeight; // Set scroll position to bottom
             } else {
                 console.log('No messages found for this conversation.');
@@ -561,7 +651,8 @@ export function handleConversationClick(conversationId) {
         .catch(error => {
             console.error('Error getting conversation history:', error);
         });
-
+    
+    
     const sendMessageBtn = document.getElementById('sendMessageBtn');
     if (!sendMessageBtn) {
         console.error('Send message button not found');
@@ -583,102 +674,140 @@ export function handleConversationClick(conversationId) {
 
 }
 
+// Function to start a chat with the specified contact
+function chatWithContact(contactId, message) {
+
+    rainbowSDK.contacts.getContactById(contactId)
+        .then(function(selectedContact) {
+            console.log('Starting chat with contact :', selectedContact);
+            if (selectedContact) {
+                // Contact found, do something with it
+                var associatedConversation = null;
+                rainbowSDK.conversations.getConversationByContactId(selectedContact.dbId)
+                    .then(function(conversation) {
+                        associatedConversation = conversation;
+                        var lastMessage = associatedConversation.lastMessageText;
+                        console.log('Last message:', lastMessage);
+                        // Send an answer
+                        rainbowSDK.im.sendMessageToConversation(associatedConversation.dbId, message)
+                        // Reload conversation after sending message
+                        handleConversationClick(associatedConversation.dbId);
+                        // Update last message
+
+                        updateLastMessage(associatedConversation.dbId,"Me: "+message);
+                    })
+                    .catch(function(err) {
+                        console.log('Error getting the associated conversation:', err);
+                        reject(err); // Reject the promise if there's an error getting the conversation
+                    });
+            } else {
+                console.log('Contact not found');
+                reject(new Error('Contact not found')); // Reject the promise if the contact is not found
+            }
+        })
+        .catch(function(err) {
+            console.log('Error getting contact by ID:', err);
+            reject(err); // Reject the promise if there's an error getting the contact by ID
+        });
+}
+
+
 function displayClickedContact(contactId) {
-  rainbowSDK.contacts.getContactById(contactId)
-    .then(function (contact) {
-      console.log('The contact found:', contact);
-      if (contact) {
-        const contactInfoDiv = document.getElementById('contactInfo');
-        contactInfoDiv.style.display = 'flex';
-        contactInfoDiv.innerHTML = ''; // Clear previous content
+    rainbowSDK.contacts.getContactById(contactId)
+        .then(function(contact) {
+            console.log('The contact found:', contact);
+            if (contact) {
+                const contactInfoDiv = document.getElementById('contactInfo');
+                contactInfoDiv.style.display = 'flex';
+                contactInfoDiv.innerHTML = ''; // Clear previous content
 
-        // Create and update avatar container and image
-        const avatarContainer = document.createElement('div');
-        avatarContainer.classList.add('clicked-avatar-container');
+                // Create and update avatar container and image
+                const avatarContainer = document.createElement('div');
+                avatarContainer.classList.add('clicked-avatar-container');
 
-        const avatarImg = document.createElement('img');
-        avatarImg.classList.add('contact-members-avatar');
-        if (contact.avatarSrc) {
-          avatarImg.src = contact.avatarSrc;
-        } else {
-          const initials = `${contact.firstname.charAt(0)}${contact.lastname.charAt(0)}`;
-          avatarImg.src = `https://ui-avatars.com/api/?name=${initials}`;
-        }
-        avatarContainer.appendChild(avatarImg);
+                const avatarImg = document.createElement('img');
+                avatarImg.classList.add('contact-members-avatar');
+                if (contact.avatarSrc) {
+                    avatarImg.src = contact.avatarSrc;
+                } else {
+                    const initials = `${contact.firstname.charAt(0)}${contact.lastname.charAt(0)}`;
+                    avatarImg.src = `https://ui-avatars.com/api/?name=${initials}`;
+                }
+                avatarContainer.appendChild(avatarImg);
 
-        // Create and update contact details container
-        const contactDetails = document.createElement('div');
-        contactDetails.classList.add('clicked-contact-details');
+                // Create and update contact details container
+                const contactDetails = document.createElement('div');
+                contactDetails.classList.add('clicked-contact-details');
 
-        // Create and update name element
-        const nameElement = document.createElement('div');
-        nameElement.classList.add('clicked-contact-name');
-        nameElement.textContent = contact.firstname + ' ' + contact.lastname;
-        contactDetails.appendChild(nameElement);
+                // Create and update name element
+                const nameElement = document.createElement('div');
+                nameElement.classList.add('clicked-contact-name');
+                nameElement.textContent = contact.firstname + ' ' + contact.lastname;
+                contactDetails.appendChild(nameElement);
 
-        // Create status container
-        const statusContainer = document.createElement('div');
-        statusContainer.classList.add('status-container');
+                // Create status container
+                const statusContainer = document.createElement('div');
+                statusContainer.classList.add('status-container');
 
-        // Create and update status icon (logic remains unchanged)
-        const statusIcon = document.createElement('div');
-        statusIcon.classList.add('clicked-status-icon');
-        switch (contact.status) {
-          case 'online':
-            statusIcon.classList.add('fas', 'fa-check-circle', 'online');
-            break;
-          case 'away':
-            statusIcon.classList.add('fas', 'fa-moon', 'away');
-            break;
-          case 'dnd':
-            statusIcon.classList.add('fas', 'fa-minus-circle', 'dnd');
-            break;
-          case 'unknown':
-          case 'offline':
-          default:
-            statusIcon.classList.add('fas', 'fa-circle', 'offline');
-            break;
-        }
-        
-        statusContainer.appendChild(statusIcon);
+                // Create and update status icon (logic remains unchanged)
+                const statusIcon = document.createElement('div');
+                statusIcon.classList.add('clicked-status-icon');
+                switch (contact.status) {
+                    case 'online':
+                        statusIcon.classList.add('fas', 'fa-check-circle', 'online');
+                        break;
+                    case 'away':
+                        statusIcon.classList.add('fas', 'fa-moon', 'away');
+                        break;
+                    case 'dnd':
+                        statusIcon.classList.add('fas', 'fa-minus-circle', 'dnd');
+                        break;
+                    case 'unknown':
+                    case 'offline':
+                    default:
+                        statusIcon.classList.add('fas', 'fa-circle', 'offline');
+                        break;
+                }
 
-        // Create and update status text conditionally
-        const statusText = document.createElement('div');
-        statusText.classList.add('clicked-status-text');
-        statusText.textContent = getStatusText(contact.status); // Only status text for online/dnd
+                statusContainer.appendChild(statusIcon);
 
-        // Append status text conditionally
-        if (contact.status === 'away' || contact.status === 'offline') {
-          const statusDuration = calculateStatusDuration(contact.lastSeen) || 'Last Seen: Unknown';
-          statusText.textContent += ` - ${statusDuration}`;
-        }
-        statusContainer.appendChild(statusText);
+                // Create and update status text conditionally
+                const statusText = document.createElement('div');
+                statusText.classList.add('clicked-status-text');
+                statusText.textContent = getStatusText(contact.status); // Only status text for online/dnd
 
-        // Append status container to contact details
-        contactDetails.appendChild(statusContainer);
+                // Append status text conditionally
+                if (contact.status === 'away' || contact.status === 'offline') {
+                    const statusDuration = calculateStatusDuration(contact.lastSeen) || 'Last Seen: Unknown';
+                    statusText.textContent += ` - ${statusDuration}`;
+                }
+                statusContainer.appendChild(statusText);
 
-        // Append elements to contactInfoDiv
-        contactInfoDiv.appendChild(avatarContainer);
-        contactInfoDiv.appendChild(contactDetails);
+                // Append status container to contact details
+                contactDetails.appendChild(statusContainer);
 
-        // Create actions container and icons (unchanged)
-        const actions = document.createElement('div');
-        actions.classList.add('actions');
-        const ellipsisIcon = document.createElement('i');
-        ellipsisIcon.classList.add('fas', 'fa-ellipsis-v');
-        const chevronIcon = document.createElement('i');
-        chevronIcon.classList.add('fas', 'fa-chevron-right');
-        actions.appendChild(ellipsisIcon);
-        actions.appendChild(chevronIcon);
+                // Append elements to contactInfoDiv
+                contactInfoDiv.appendChild(avatarContainer);
+                contactInfoDiv.appendChild(contactDetails);
 
-        contactInfoDiv.appendChild(actions);
-      } else {
-        console.log('Contact not found');
-      }
-    })
-    .catch(function (err) {
-      console.log('Error getting contact by ID:', err);
-    });
+                // Create actions container and icons (unchanged)
+                const actions = document.createElement('div');
+                actions.classList.add('actions');
+                const ellipsisIcon = document.createElement('i');
+                ellipsisIcon.classList.add('fas', 'fa-ellipsis-v');
+                const chevronIcon = document.createElement('i');
+                chevronIcon.classList.add('fas', 'fa-chevron-right');
+                actions.appendChild(ellipsisIcon);
+                actions.appendChild(chevronIcon);
+
+                contactInfoDiv.appendChild(actions);
+            } else {
+                console.log('Contact not found');
+            }
+        })
+        .catch(function(err) {
+            console.log('Error getting contact by ID:', err);
+        });
 }
 
 function getStatusText(status) {
@@ -707,8 +836,8 @@ function calculateStatusDuration(lastSeenTimestamp) {
 }
 
 // Function to display message
-function displayMessage(conversationId,message, isMe) {
-    
+function displayMessage(conversationId, message, isMe) {
+
     const conversation = rainbowSDK.conversations.getConversationById(conversationId);
     const chatBox = document.getElementById('chatBox');
 
@@ -719,32 +848,32 @@ function displayMessage(conversationId,message, isMe) {
     // Append message element to avatar-message container
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
-    
-if (message.deleted) {
-    if (isMe) {
-      messageElement.textContent = 'You deleted this message';
-      // Update last message only if the deleted message content matches last message text
-      if (conversation.lastMessageText === message.data) {
-        updateLastMessage(conversation.dbId, "Message deleted");
-      }
+
+    if (message.deleted) {
+        if (isMe) {
+            messageElement.textContent = 'You deleted this message';
+            // Update last message only if the deleted message content matches last message text
+            if (conversation.lastMessageText === message.data) {
+                updateLastMessage(conversation.dbId, "Message deleted");
+            }
+        } else {
+            messageElement.textContent = 'This message was deleted';
+            // Update last message only if the deleted message content matches last message text
+            if (conversation.lastMessageText === message.data) {
+                updateLastMessage(conversation.dbId, "Message deleted");
+            }
+        }
     } else {
-      messageElement.textContent = 'This message was deleted';
-      // Update last message only if the deleted message content matches last message text
-      if (conversation.lastMessageText === message.data) {
-        updateLastMessage(conversation.dbId, "Message deleted");
-      }
+
+        messageElement.textContent = message.data;
     }
-  } else {
-      
-    messageElement.textContent = message.data;
-  }
-    
-  
+
+
     // Create message metadata element (date)
     const metadataElement = document.createElement('div');
     metadataElement.classList.add('message-metadata');
-    
-  // Create receipt status indicator (applicable for all messages)
+
+    // Create receipt status indicator (applicable for all messages)
 
     // Function to format date as "May 21st 2:42 PM"
     function formatDate(date) {
@@ -777,17 +906,17 @@ if (message.deleted) {
         messageElement.classList.add('sent-message');
         messageElement.id = 'sentMessage'; // Add ID for sent message
         metadataElement.classList.add('sent-metadata');
-        
-    // Create receipt status indicator (only for sent messages)
-    const receiptStatusIndicator = document.createElement('span');
-    receiptStatusIndicator.classList.add('receipt-status');
 
-    // Initial receipt status update
-    updateReceiptStatus(receiptStatusIndicator, message.receiptStatus);
+        // Create receipt status indicator (only for sent messages)
+        const receiptStatusIndicator = document.createElement('span');
+        receiptStatusIndicator.classList.add('receipt-status');
 
-    // Append message date and receipt status to metadata element
-    metadataElement.appendChild(messageDate);
-    metadataElement.appendChild(receiptStatusIndicator);
+        // Initial receipt status update
+        updateReceiptStatus(receiptStatusIndicator, message.receiptStatus);
+
+        // Append message date and receipt status to metadata element
+        metadataElement.appendChild(messageDate);
+        metadataElement.appendChild(receiptStatusIndicator);
 
         // Append message element to message container
         messageContainer.appendChild(messageElement);
@@ -843,25 +972,25 @@ if (message.deleted) {
 // Function to handle new receipt events
 let onNewMessageReceiptReceived = function(event) {
 
-  let message = event.detail.message;
-  let conversation = event.detail.conversation;
-  let type = event.detail.evt;
-  
-  console.log("here is the type of the recieved reciept",type)
+    let message = event.detail.message;
+    let conversation = event.detail.conversation;
+    let type = event.detail.evt;
 
-  switch (type) {
-    case "server":
-      updateMessageReceiptStatus(message.id, 3);
-      break;
-    case "received":
-      updateMessageReceiptStatus(message.id, 4);
-      break;
-    case "read":
-      updateMessageReceiptStatus(message.id, 5);
-      break;
-    default:
-      break;
-  }
+    console.log("here is the type of the recieved reciept", type)
+
+    switch (type) {
+        case "server":
+            updateMessageReceiptStatus(message.id, 3);
+            break;
+        case "received":
+            updateMessageReceiptStatus(message.id, 4);
+            break;
+        case "read":
+            updateMessageReceiptStatus(message.id, 5);
+            break;
+        default:
+            break;
+    }
 };
 
 // Event listener for new receipt events
@@ -870,19 +999,19 @@ document.addEventListener(rainbowSDK.im.RAINBOW_ONNEWIMRECEIPTRECEIVED, onNewMes
 
 // Function to update the receipt status of a message by its ID
 function updateMessageReceiptStatus(messageId, receiptStatus) {
-  // Find the message container element based on message ID (assuming a unique ID)
-  const messageContainer = document.getElementById(`message-container-${messageId}`);
-  if (messageContainer) {
-    // Find the metadata element within the message container
-    const metadataElement = messageContainer.querySelector('.message-metadata');
-    if (metadataElement) {
-      // Find the receipt status indicator within the metadata element
-      const receiptStatusIndicator = metadataElement.querySelector('.receipt-status');
-      if (receiptStatusIndicator) {
-        updateReceiptStatus(receiptStatusIndicator, receiptStatus);
-      }
+    // Find the message container element based on message ID (assuming a unique ID)
+    const messageContainer = document.getElementById(`message-container-${messageId}`);
+    if (messageContainer) {
+        // Find the metadata element within the message container
+        const metadataElement = messageContainer.querySelector('.message-metadata');
+        if (metadataElement) {
+            // Find the receipt status indicator within the metadata element
+            const receiptStatusIndicator = metadataElement.querySelector('.receipt-status');
+            if (receiptStatusIndicator) {
+                updateReceiptStatus(receiptStatusIndicator, receiptStatus);
+            }
+        }
     }
-  }
 }
 
 
@@ -919,45 +1048,6 @@ function updateReceiptStatus(receiptStatusIndicator, receiptStatus) {
             break;
     }
 }
-// Function to start a chat with the specified contact
-function chatWithContact(contactId, message) {
-    console.log('Starting chat with contact with ID :', contactId);
-
-    rainbowSDK.contacts.getContactById(contactId)
-        .then(function(selectedContact) {
-            console.log('the contact found:', selectedContact);
-            if (selectedContact) {
-                // Contact found, do something with it
-                var associatedConversation = null;
-                rainbowSDK.conversations.getConversationByContactId(selectedContact.dbId)
-                    .then(function(conversation) {
-                        associatedConversation = conversation;
-                        var lastMessage = associatedConversation.lastMessageText;
-                        console.log('Last message:', lastMessage);
-                        // Send an answer
-                        rainbowSDK.im.sendMessageToConversation(associatedConversation.dbId, message)
-                        // Reload conversation after sending message
-                        handleConversationClick(associatedConversation.dbId);
-                          // Update last message
-                          
-                        updateLastMessage(associatedConversation.dbId, message);
-                    })
-                    .catch(function(err) {
-                        console.log('Error getting the associated conversation:', err);
-                        reject(err); // Reject the promise if there's an error getting the conversation
-                    });
-            } else {
-                console.log('Contact not found');
-                reject(new Error('Contact not found')); // Reject the promise if the contact is not found
-            }
-        })
-        .catch(function(err) {
-            console.log('Error getting contact by ID:', err);
-            reject(err); // Reject the promise if there's an error getting the contact by ID
-        });
-}
-
-
 
 function handleDisplayContact(contactId) {
     const detailContact = document.getElementById('detailContact');
