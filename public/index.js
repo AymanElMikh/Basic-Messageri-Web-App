@@ -1,115 +1,151 @@
-/* Chose one of the import statement below */
-import rainbowSDK from './rainbow-sdk.min.js'; // If you do not use the bundler
-import { initChat } from './chat.js';
-import { initSearch } from './search.js';
-import { initConversation } from './conversation.js';
-import  {redirectToAuthentication, handleAuthenticationCallback} from './auth.js';
+import rainbowSDK from './rainbow-sdk.min.js';
 
-var onReady = function onReady(){
-    var sessionToken = getAccessTokenFromSession();
-    if (sessionToken) {
-        // Token exists, sign in with the token
-        rainbowSDK.connection.signinWithToken(sessionToken)
-            .then(function (account) {
-                // Successfully signed in with token
-                console.log('Signed in Successfully');
-                console.log(account);
+let conversations;
 
-            })
-            .catch(function (err) {
-                // An error occurs
-                console.log('[Hello World] :: Something went wrong with the signing...', err);
-            });
-    } else {
-        redirectToAuthentication();
-    };
-};
+let onReady = function onReady() {
+    console.log('[Hello World] :: On SDK Ready!');
+    let myRainbowLogin = "aymanmikh7@gmail.com";
+    let myRainbowPassword = "aymanMIKH@2000";
 
-
-// Function to retrieve the access token from the session
-function getAccessTokenFromSession() {
-  // Retrieve the access token from the session storage
-  return sessionStorage.getItem('accessToken');
-}
-
-
-var onSigned = function onSigned(event) {
-	let account = event.detail;
-}
-
-var onConnectionStateChangeEvent = function onConnectionStateChangeEvent(event) {
-        let status = event.detail.status;
-
-        switch(status) {
-            case rainbowSDK.connection.RAINBOW_CONNECTIONCONNECTED:
-                // The state of the connection has changed to "connected" which means that your application is now connected to Rainbow
-                console.log('[Hello World] : the state of the connection has changed to "connected"');
-		break;
-            case rainbowSDK.connection.RAINBOW_CONNECTIONINPROGRESS:
-                // The state of the connection is now in progress which means that your application try to connect to Rainbow
-                console.log('[Hello World] : the state of the connection has changed to in progress');
-		break;
-            case rainbowSDK.connection.RAINBOW_CONNECTIONDISCONNECTED:
-                // The state of the connection changed to "disconnected" which means that your application is no more connected to Rainbow
-                console.log('[Hello World] : the state of the connection changed to "disonnected" !');
-		break;
-            default:
-                break;
-        };
-};
-
-var signout = function signout() {
-
-        // The SDK for Web is ready to be used, so you can sign in
-        rainbowSDK.connection.signout()
-        .then(function() {
-              // Successfully signed out from Rainbow
-		console.log('[Hello World] Signed out has done succesfully !');
-        	search();
-	})
+    rainbowSDK.connection.signin(myRainbowLogin, myRainbowPassword)
+        .then(function(account) {
+            console.log('[Hello World] :: Signed in as', account);
+            document.getElementById('searchContainer').style.display = 'block';
+        })
         .catch(function(err) {
-              // An error occurs during the stop of the Rainbow SDK
-		console.log('[Hello World ] : Something bad happened to the server');
+            console.error('[Hello World] :: Sign-in error', err);
         });
-    };
 
-var onStopped = function onStopped(event) {
-        // The SDK has been completely stopped.
-	console.log("[Hello World ] : you cannot call any method, Rainbow SDK has been stopped !");
 };
 
-var onStarted = function onStarted() {
-    console.log('[Hello World] :: On SDK Started !');
-};
-
-var onLoaded = function onLoaded() {
+let onLoaded = function onLoaded() {
     console.log('[Hello World] :: On SDK Loaded!');
 
-    rainbowSDK
-        .initialize('23b6d4d0061111ef9f25994f9ae1ef66', 'AGYoE8SZ6w8Zpr7XjrKAN9rUYndOkYO7CZwbIbJKvdcn3uGDl5s3EzTZAFEM7YaJ')
+    rainbowSDK.initialize('23b6d4d0061111ef9f25994f9ae1ef66', 'AGYoE8SZ6w8Zpr7XjrKAN9rUYndOkYO7CZwbIbJKvdcn3uGDl5s3EzTZAFEM7YaJ')
         .then(() => {
             console.log('[Hello World] :: Rainbow SDK is initialized!');
-	    handleAuthenticationCallback();
         })
         .catch(err => {
-            console.log('[Hello World] :: Something went wrong with the SDK...', err);
+            console.log('[Hello World] :: Something went wrong with the SDK initialization', err);
         });
+
+    conversations = rainbowSDK.conversations;
 };
 
+function searchByName() {
+    let searchInput = document.getElementById('searchInputByName').value;
+    if (searchInput.length > 0) {
+        rainbowSDK.contacts.searchByName(searchInput, 10)
+            .then(usersFound => {
+                let resultsDiv = document.getElementById('searchResults');
+                resultsDiv.innerHTML = '';
+
+                if (usersFound.length > 0) {
+                    usersFound.forEach(user => {
+                        let listItem = document.createElement('div');
+                        listItem.innerHTML = `
+                            <div><strong>Name:</strong> ${user.firstname} ${user.lastname}</div>
+                            <div><strong>Email:</strong> ${user.loginEmail}</div>
+                            <div><strong>Job Title:</strong> ${user.jobTitle}</div>
+                            <div><strong>Company:</strong> ${user.company ? user.company.name : 'N/A'}</div>
+                            <div><strong>Phone:</strong> ${user.professionalPhoneNumber || 'N/A'}</div>
+                            <div><strong>Mobile:</strong> ${user.professionalMobileNumber || 'N/A'}</div>
+                            <div><strong>Status:</strong> ${user.status || 'N/A'}</div>
+                            <div><strong>Country:</strong> ${user.country || 'N/A'}</div>
+                            <hr>
+                        `;
+                        resultsDiv.appendChild(listItem);
+                    });
+                } else {
+                    resultsDiv.textContent = 'No user found with that name';
+                }
+            })
+            .catch(err => {
+                console.error("Error during search by name: ", err);
+            });
+    }
+}
+
+async function searchConversationsByText(inputText) {
+    if (!conversations) {
+        console.error("Conversations object is not defined.");
+        return [];
+    }
+    
+    let filteredConversations = [];
+
+    let allConversations = await conversations.getAllConversations();
+
+    for (let conversation of allConversations) {
+        
+            let conv = await rainbowSDK.im.getMessagesFromConversation(conversation.dbId, 30);
+            const messages = conv.messages;
+
+            let occurrenceCount = 0;
+            let messageIds = [];
+
+            for (let message of messages) {
+                if (message.type.value === "Chat" && message.data.includes(inputText)) {
+                    occurrenceCount++;
+
+                    messageIds.push(message.id);
+                }
+            }
+
+            if (occurrenceCount > 0) {
+                filteredConversations.push({
+                    conversationId: conversation.dbId,
+                    occurrenceCount: occurrenceCount,
+                    messageIds: messageIds
+                });
+            }
+        
+    }
+
+    return filteredConversations;
+}
+
+
+
+function displaySearchResults(conversations) {
+    let resultsDiv = document.getElementById('conversationResults');
+    resultsDiv.innerHTML = '';
+
+    if (conversations.length > 0) {
+        conversations.forEach(conversation => {
+            let conversationDiv = document.createElement('div');
+            conversationDiv.classList.add('conversation-item');
+
+            let conversationInfo = document.createElement('div');
+            conversationInfo.textContent = `Conversation ID: ${conversation.conversationId} | Occurrences: ${conversation.occurrenceCount}`;
+            conversationInfo.classList.add('conversation-info');
+            conversationDiv.appendChild(conversationInfo);
+
+            let messageList = document.createElement('ul');
+            conversation.messageIds.forEach(messageId => {
+                let messageItem = document.createElement('li');
+                messageItem.textContent = `Message ID: ${messageId}`;
+                messageList.appendChild(messageItem);
+            });
+            conversationDiv.appendChild(messageList);
+
+            resultsDiv.appendChild(conversationDiv);
+        });
+    } else {
+        resultsDiv.textContent = 'No conversations found with the provided text';
+    }
+}
 
 
 document.addEventListener(rainbowSDK.RAINBOW_ONREADY, onReady);
 document.addEventListener(rainbowSDK.RAINBOW_ONLOADED, onLoaded);
-document.addEventListener(rainbowSDK.connection.RAINBOW_ONSIGNED, onSigned);
-document.addEventListener(rainbowSDK.connection.RAINBOW_ONSTARTED, onStarted); // event will be fired once user connects and all SDK services start
-document.addEventListener(rainbowSDK.connection.RAINBOW_ONCONNECTIONSTATECHANGED, onConnectionStateChangeEvent)
-document.addEventListener(rainbowSDK.connection.RAINBOW_ONSTOPPED, onStopped)
-
-// initializations 
-
-initSearch();
-initConversation();
-initChat();
 
 rainbowSDK.start();
 rainbowSDK.load();
+
+document.getElementById('searchInputByName').addEventListener('input', searchByName);
+document.getElementById('searchInputByText').addEventListener('input', async function() {
+    let searchText = this.value.trim();
+    let conversations = await searchConversationsByText(searchText);
+    displaySearchResults(conversations);
+});
