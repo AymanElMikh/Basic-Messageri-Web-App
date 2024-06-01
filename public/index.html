@@ -11,25 +11,26 @@
         <script src="//cdn.jsdelivr.net/momentjs/2.15.1/moment-with-locales.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.5/angular.min.js"></script>
         <script src="./vendors-sdk.min.js"></script>
+        <script src="./rainbow-sdk.min.js"></script>
         <script type="module" src="./index.js"></script>
 </head>
 <body>
     <h1>Rainbow Hello World Application</h1>
     <div id="searchContainer" style="display: none;">
-        <h4>Search of users</h4>
-        <input type="text" id="searchInputByName" placeholder="Search about a user by name"/>
-        <div id="searchResults"></div>
-        <h4>Search Conversations</h4>
-        <input type="text" id="searchInputByText" placeholder="Search conversations by text"/>
-        <div id="conversationResults"></div>
-        <div id="conversationContent">
+        <h4>Search</h4>
+        <select id="searchType">
+            <option value="user">User</option>
+            <option value="bubble">Bubble</option>
+            <option value="channel">Channel</option>
+            <option value="conversation">Conversation</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="Enter search text"/>
+        <div id="searchResults">    
         </div>
-        <h4>Search of bubbles</h4>
-        <input type="text" id="searchInputByBubbleName" placeholder="Search about a bubble by name"/>
-        <div id="bubbleSearchResults"></div>
-        <h4>Search of channels</h4>
-        <input type="text" id="searchInputByChannelName" placeholder="Search about a channel by name"/>
-        <div id="channelSearchResults"></div>
+        <div id="conversationContent"></div>
+
     </div>
+    
+    
 </body>
 </html>

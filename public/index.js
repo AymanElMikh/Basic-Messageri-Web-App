@@ -4,6 +4,7 @@ let conversations;
 let searchText = '';
 let bubbles;
 let channels;
+let contacts;
 
 let onReady = function onReady() {
     console.log('[Hello World] :: On SDK Ready!');
@@ -32,12 +33,15 @@ let onLoaded = function onLoaded() {
         });
 
     conversations = rainbowSDK.conversations;
+    bubbles = rainbowSDK.bubbles;
+    channels = rainbowSDK.channels;
+    contacts = rainbowSDK.contacts;
 };
 
 function searchByName() {
-    let searchInput = document.getElementById('searchInputByName').value;
+    let searchInput = document.getElementById('searchInput').value;
     if (searchInput.length > 0) {
-        rainbowSDK.contacts.searchByName(searchInput, 10)
+        contacts.searchByName(searchInput, 10)
             .then(usersFound => {
                 let resultsDiv = document.getElementById('searchResults');
                 resultsDiv.innerHTML = '';
@@ -68,14 +72,15 @@ function searchByName() {
     }
 }
 
-async function searchConversationsByText(inputText) {
+async function searchConversationsByText() {
+    let searchInput = document.getElementById('searchInput').value;
     if (!conversations) {
         console.error("Conversations object is not defined.");
         return [];
     }
 
     let filteredConversations = [];
-    searchText = inputText; // Update the global searchText variable
+    searchText = searchInput; // Update the global searchText variable
 
     let allConversations = await conversations.getAllConversations();
 
@@ -87,7 +92,7 @@ async function searchConversationsByText(inputText) {
         let messageIds = [];
 
         for (let message of messages) {
-            if (message.type.value === "Chat" && message.data.includes(inputText)) {
+            if (message.type.value === "Chat" && message.data.includes(searchInput)) {
                 occurrenceCount++;
                 messageIds.push(message.id);
             }
@@ -106,7 +111,7 @@ async function searchConversationsByText(inputText) {
 }
 
 function displaySearchResults(conversations) {
-    let resultsDiv = document.getElementById('conversationResults');
+    let resultsDiv = document.getElementById('searchResults');
     resultsDiv.innerHTML = '';
 
     if (conversations.length > 0) {
@@ -157,13 +162,13 @@ async function displayConversationContent(conversation) {
 }
 
 async function searchBubblesByName() {
-    let searchInput = document.getElementById('searchInputByBubbleName').value;
+    let searchInput = document.getElementById('searchInput').value;
     if (searchInput.length > 0) {
         try {
-            let allBubbles = await rainbowSDK.bubbles.getAllBubbles();
+            let allBubbles = await bubbles.getAllBubbles();
             let filteredBubbles = allBubbles.filter(bubble => bubble.name.includes(searchInput));
 
-            let resultsDiv = document.getElementById('bubbleSearchResults');
+            let resultsDiv = document.getElementById('searchResults');
             resultsDiv.innerHTML = '';
 
             if (filteredBubbles.length > 0) {
@@ -186,12 +191,12 @@ async function searchBubblesByName() {
 }
 
 async function searchChannelsByName() {
-    let searchInput = document.getElementById('searchInputByChannelName').value;
+    let searchInput = document.getElementById('searchInput').value;
     if (searchInput.length > 0) {
         try {
-            let filteredChannels = await rainbowSDK.channels.fetchChannelsByName(searchInput);
+            let filteredChannels = await channels.fetchChannelsByName(searchInput);
 
-            let resultsDiv = document.getElementById('channelSearchResults');
+            let resultsDiv = document.getElementById('searchResults');
             resultsDiv.innerHTML = '';
 
             if (filteredChannels.length > 0) {
@@ -219,11 +224,29 @@ document.addEventListener(rainbowSDK.RAINBOW_ONLOADED, onLoaded);
 rainbowSDK.start();
 rainbowSDK.load();
 
-document.getElementById('searchInputByName').addEventListener('input', searchByName);
-document.getElementById('searchInputByText').addEventListener('input', async function() {
-    let searchText = this.value.trim();
-    let conversations = await searchConversationsByText(searchText);
-    displaySearchResults(conversations);
+async function proxy(searchType) {
+    let searchText = document.getElementById('searchInput').value.trim();
+    
+    switch (searchType) {
+        case 'user':
+            searchByName();
+            break;
+        case 'bubble':
+            await searchBubblesByName();
+            break;
+        case 'channel':
+            await searchChannelsByName();
+            break;
+        case 'conversation':
+            let conversations = await searchConversationsByText(searchText);
+            displaySearchResults(conversations);
+            break;
+        default:
+            console.error("Invalid search type");
+            break;
+    }
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+    proxy(document.getElementById('searchType').value);
 });
-document.getElementById('searchInputByBubbleName').addEventListener('input', searchBubblesByName);
-document.getElementById('searchInputByChannelName').addEventListener('input', searchChannelsByName);
