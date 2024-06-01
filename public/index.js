@@ -1,6 +1,9 @@
 import rainbowSDK from './rainbow-sdk.min.js';
 
 let conversations;
+let searchText = '';
+let bubbles;
+let channels;
 
 let onReady = function onReady() {
     console.log('[Hello World] :: On SDK Ready!');
@@ -15,7 +18,6 @@ let onReady = function onReady() {
         .catch(function(err) {
             console.error('[Hello World] :: Sign-in error', err);
         });
-
 };
 
 let onLoaded = function onLoaded() {
@@ -71,41 +73,37 @@ async function searchConversationsByText(inputText) {
         console.error("Conversations object is not defined.");
         return [];
     }
-    
+
     let filteredConversations = [];
+    searchText = inputText; // Update the global searchText variable
 
     let allConversations = await conversations.getAllConversations();
 
     for (let conversation of allConversations) {
-        
-            let conv = await rainbowSDK.im.getMessagesFromConversation(conversation.dbId, 30);
-            const messages = conv.messages;
+        let conv = await rainbowSDK.im.getMessagesFromConversation(conversation.dbId, 30);
+        const messages = conv.messages;
 
-            let occurrenceCount = 0;
-            let messageIds = [];
+        let occurrenceCount = 0;
+        let messageIds = [];
 
-            for (let message of messages) {
-                if (message.type.value === "Chat" && message.data.includes(inputText)) {
-                    occurrenceCount++;
-
-                    messageIds.push(message.id);
-                }
+        for (let message of messages) {
+            if (message.type.value === "Chat" && message.data.includes(inputText)) {
+                occurrenceCount++;
+                messageIds.push(message.id);
             }
+        }
 
-            if (occurrenceCount > 0) {
-                filteredConversations.push({
-                    conversationId: conversation.dbId,
-                    occurrenceCount: occurrenceCount,
-                    messageIds: messageIds
-                });
-            }
-        
+        if (occurrenceCount > 0) {
+            filteredConversations.push({
+                conversationId: conversation.dbId,
+                occurrenceCount: occurrenceCount,
+                messages: messages
+            });
+        }
     }
 
     return filteredConversations;
 }
-
-
 
 function displaySearchResults(conversations) {
     let resultsDiv = document.getElementById('conversationResults');
@@ -121,13 +119,13 @@ function displaySearchResults(conversations) {
             conversationInfo.classList.add('conversation-info');
             conversationDiv.appendChild(conversationInfo);
 
-            let messageList = document.createElement('ul');
-            conversation.messageIds.forEach(messageId => {
-                let messageItem = document.createElement('li');
-                messageItem.textContent = `Message ID: ${messageId}`;
-                messageList.appendChild(messageItem);
+            let showContentButton = document.createElement('button');
+            showContentButton.textContent = "Show Content";
+            showContentButton.classList.add('show-content-button');
+            showContentButton.addEventListener('click', function() {
+                displayConversationContent(conversation);
             });
-            conversationDiv.appendChild(messageList);
+            conversationDiv.appendChild(showContentButton);
 
             resultsDiv.appendChild(conversationDiv);
         });
@@ -136,6 +134,84 @@ function displaySearchResults(conversations) {
     }
 }
 
+async function displayConversationContent(conversation) {
+    let contentDiv = document.getElementById('conversationContent');
+    contentDiv.innerHTML = '';
+
+    let conversationIdHeading = document.createElement('h2');
+    conversationIdHeading.textContent = `Conversation ID: ${conversation.conversationId}`;
+    contentDiv.appendChild(conversationIdHeading);
+
+    let messageList = document.createElement('ul');
+    conversation.messages.forEach(message => {
+        let messageItem = document.createElement('li');
+        messageItem.innerHTML = `
+            <strong>Message Data:</strong> ${message.data}
+        `;
+        if (message.data.includes(searchText)) {
+            messageItem.style.color = 'red';
+        }
+        messageList.appendChild(messageItem);
+    });
+    contentDiv.appendChild(messageList);
+}
+
+async function searchBubblesByName() {
+    let searchInput = document.getElementById('searchInputByBubbleName').value;
+    if (searchInput.length > 0) {
+        try {
+            let allBubbles = await rainbowSDK.bubbles.getAllBubbles();
+            let filteredBubbles = allBubbles.filter(bubble => bubble.name.includes(searchInput));
+
+            let resultsDiv = document.getElementById('bubbleSearchResults');
+            resultsDiv.innerHTML = '';
+
+            if (filteredBubbles.length > 0) {
+                filteredBubbles.forEach(bubble => {
+                    let listItem = document.createElement('div');
+                    listItem.innerHTML = `
+                        <div><strong>Bubble Name:</strong> ${bubble.name}</div>
+                        <div><strong>Bubble ID:</strong> ${bubble.dbId}</div>
+                        <hr>
+                    `;
+                    resultsDiv.appendChild(listItem);
+                });
+            } else {
+                resultsDiv.textContent = 'No bubbles found with that name';
+            }
+        } catch (err) {
+            console.error("Error during search by bubble name: ", err);
+        }
+    }
+}
+
+async function searchChannelsByName() {
+    let searchInput = document.getElementById('searchInputByChannelName').value;
+    if (searchInput.length > 0) {
+        try {
+            let filteredChannels = await rainbowSDK.channels.fetchChannelsByName(searchInput);
+
+            let resultsDiv = document.getElementById('channelSearchResults');
+            resultsDiv.innerHTML = '';
+
+            if (filteredChannels.length > 0) {
+                filteredChannels.forEach(channel => {
+                    let listItem = document.createElement('div');
+                    listItem.innerHTML = `
+                        <div><strong>Channel Name:</strong> ${channel.name}</div>
+                        <div><strong>Channel ID:</strong> ${channel.id}</div>
+                        <hr>
+                    `;
+                    resultsDiv.appendChild(listItem);
+                });
+            } else {
+                resultsDiv.textContent = 'No channels found with that name';
+            }
+        } catch (err) {
+            console.error("Error during search by channel name: ", err);
+        }
+    }
+}
 
 document.addEventListener(rainbowSDK.RAINBOW_ONREADY, onReady);
 document.addEventListener(rainbowSDK.RAINBOW_ONLOADED, onLoaded);
@@ -149,3 +225,5 @@ document.getElementById('searchInputByText').addEventListener('input', async fun
     let conversations = await searchConversationsByText(searchText);
     displaySearchResults(conversations);
 });
+document.getElementById('searchInputByBubbleName').addEventListener('input', searchBubblesByName);
+document.getElementById('searchInputByChannelName').addEventListener('input', searchChannelsByName);
